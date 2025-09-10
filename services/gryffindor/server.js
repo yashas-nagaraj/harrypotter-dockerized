@@ -1,3 +1,4 @@
+cat > services/gryffindor/server.js <<'EOF'
 // Gryffindor service
 const express = require('express');
 const cors = require('cors');
@@ -24,57 +25,61 @@ const pool = new Pool({
 });
 
 (async function init() {
-  const client = await pool.connect();
   try {
+    const client = await pool.connect();
     await client.query(`
       CREATE TABLE IF NOT EXISTS questions (
         id SERIAL PRIMARY KEY,
         house_name VARCHAR(50),
-        question_text TEXT,
+        question_text TEXT NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
-    console.log('Ensured questions table exists');
-  } finally {
     client.release();
+    console.log('Ensured questions table exists');
+  } catch (err) {
+    console.error('DB init error:', err && err.message ? err.message : err);
+    process.exit(1);
   }
 })();
 
 app.get('/info', (req, res) => {
   res.json({
     house: HOUSE_NAME,
-    short: `${HOUSE_NAME}: brave, bold and noble (placeholder text).`,
-    history: `A short history of ${HOUSE_NAME}... (add more content here).`,
+    short: HOUSE_NAME + ': brave, bold and noble (placeholder).',
+    history: 'A short history of ' + HOUSE_NAME + '... (edit in repo/frontend).',
   });
 });
 
 app.post('/questions', async (req, res) => {
-  const { question } = req.body;
-  if (!question) return res.status(400).json({ error: 'question required' });
-  const client = await pool.connect();
+  const { question } = req.body || {};
+  if (!question || !question.toString().trim()) return res.status(400).json({ error: 'question required' });
   try {
+    const client = await pool.connect();
     const r = await client.query(
-      'INSERT INTO questions(house_name, question_text) VALUES($1,$2) RETURNING *',
-      [HOUSE_NAME, question]
+      'INSERT INTO questions(house_name, question_text) VALUES($1,$2) RETURNING id, house_name, question_text, created_at',
+      [HOUSE_NAME, question.toString()]
     );
-    res.json(r.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'db error' });
-  } finally {
     client.release();
+    res.status(201).json(r.rows[0]);
+  } catch (err) {
+    console.error('insert error', err && err.message ? err.message : err);
+    res.status(500).json({ error: 'db error' });
   }
 });
 
 app.get('/questions', async (req, res) => {
-  const client = await pool.connect();
   try {
-    const r = await client.query('SELECT * FROM questions WHERE house_name=$1 ORDER BY created_at DESC', [HOUSE_NAME]);
-    res.json(r.rows);
-  } finally {
+    const client = await pool.connect();
+    const r = await client.query('SELECT id, house_name, question_text, created_at FROM questions WHERE house_name=$1 ORDER BY created_at DESC LIMIT 100', [HOUSE_NAME]);
     client.release();
+    res.json(r.rows);
+  } catch (err) {
+    console.error('select error', err && err.message ? err.message : err);
+    res.status(500).json({ error: 'db error' });
   }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(HOUSE_NAME + ' service running on ' + PORT));
+EOF
