@@ -12,7 +12,7 @@ const {
   DB_USER = 'hp_user',
   DB_PASS = 'hp_pass',
   DB_NAME = 'hp_db',
-  HOUSE_NAME = 'Gryffindor', // overridden by docker-compose
+  HOUSE_NAME = 'Hufflepuff', // overridden by docker-compose
 } = process.env;
 
 const pool = new Pool({
