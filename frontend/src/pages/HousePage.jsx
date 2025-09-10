@@ -1,4 +1,3 @@
-cat > frontend/src/pages/HousePage.jsx <<'EOF'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -113,4 +112,3 @@ export default function HousePage(){
     </div>
   )
 }
-EOF
