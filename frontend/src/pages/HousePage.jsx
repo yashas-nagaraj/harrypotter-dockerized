@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-// frontend/src/pages/HousePage.jsx
+cat > frontend/src/pages/HousePage.jsx <<'EOF'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -21,12 +20,11 @@ export default function HousePage(){
 
     ;(async () => {
       try {
-        const infoResp = await fetch(`/api/${house}/info`)
+        const infoResp = await fetch(\`/api/\${house}/info\`)
         if (!infoResp.ok) throw new Error('Failed to load house info')
         const infoJson = await infoResp.json()
 
-        // try to load previous questions (if endpoint allowed)
-        const qResp = await fetch(`/api/${house}/questions`)
+        const qResp = await fetch(\`/api/\${house}/questions\`)
         const qJson = qResp.ok ? await qResp.json() : []
 
         if (mounted) {
@@ -48,7 +46,7 @@ export default function HousePage(){
     setSubmitting(true)
     setError(null)
     try {
-      const res = await fetch(`/api/${house}/questions`, {
+      const res = await fetch(\`/api/\${house}/questions\`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ question })
@@ -62,7 +60,6 @@ export default function HousePage(){
       setError(e.message || 'Failed to submit')
     } finally {
       setSubmitting(false)
-      // clear submitted flag after a short time (optional)
       setTimeout(()=>setSubmitted(false), 2500)
     }
   }
@@ -116,5 +113,4 @@ export default function HousePage(){
     </div>
   )
 }
-
-}
+EOF
