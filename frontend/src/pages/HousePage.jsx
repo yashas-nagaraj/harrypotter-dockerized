@@ -20,11 +20,11 @@ export default function HousePage(){
 
     ;(async () => {
       try {
-        const infoResp = await fetch(\`/api/\${house}/info\`)
+        const infoResp = await fetch('/api/' + house + '/info')
         if (!infoResp.ok) throw new Error('Failed to load house info')
         const infoJson = await infoResp.json()
 
-        const qResp = await fetch(\`/api/\${house}/questions\`)
+        const qResp = await fetch('/api/' + house + '/questions')
         const qJson = qResp.ok ? await qResp.json() : []
 
         if (mounted) {
@@ -46,10 +46,10 @@ export default function HousePage(){
     setSubmitting(true)
     setError(null)
     try {
-      const res = await fetch(\`/api/\${house}/questions\`, {
+      const res = await fetch('/api/' + house + '/questions', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ question })
+        body: JSON.stringify({ question: question })
       })
       if (!res.ok) throw new Error('Submit failed')
       const saved = await res.json()
@@ -72,8 +72,8 @@ export default function HousePage(){
     <div style={{padding:20,fontFamily:'sans-serif'}}>
       <h2>{info.house}</h2>
       <img
-        src={`/images/${house}.jpg`}
-        alt={`${info.house} banner`}
+        src={'/images/' + house + '.jpg'}
+        alt={info.house + ' banner'}
         style={{maxWidth:600,width:'100%',height:300,objectFit:'cover'}}
         loading="lazy"
       />
@@ -88,7 +88,7 @@ export default function HousePage(){
           onChange={e=>setQuestion(e.target.value)}
           rows={4}
           cols={60}
-          placeholder={`Ask something about ${info.house}...`}
+          placeholder={'Ask something about ' + info.house + '...'}
           disabled={submitting}
         />
         <br/>
@@ -103,7 +103,7 @@ export default function HousePage(){
       ) : (
         <ul>
           {questions.map(q => (
-            <li key={q.id || `${q.created_at}-${Math.random()}`} style={{marginBottom:8}}>
+            <li key={q.id || (q.created_at + Math.random())} style={{marginBottom:8}}>
               <div style={{fontSize:14}}>{q.question_text || q.question}</div>
               <div style={{fontSize:12, color:'#666'}}>{new Date(q.created_at).toLocaleString()}</div>
             </li>
