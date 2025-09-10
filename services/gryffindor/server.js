@@ -1,5 +1,4 @@
-cat > services/gryffindor/server.js <<'EOF'
-// Gryffindor service
+// House service
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -13,7 +12,7 @@ const {
   DB_USER = 'hp_user',
   DB_PASS = 'hp_pass',
   DB_NAME = 'hp_db',
-  HOUSE_NAME = 'Gryffindor',
+  HOUSE_NAME = 'Gryffindor', // overridden by docker-compose
 } = process.env;
 
 const pool = new Pool({
@@ -53,7 +52,9 @@ app.get('/info', (req, res) => {
 
 app.post('/questions', async (req, res) => {
   const { question } = req.body || {};
-  if (!question || !question.toString().trim()) return res.status(400).json({ error: 'question required' });
+  if (!question || !question.toString().trim()) {
+    return res.status(400).json({ error: 'question required' });
+  }
   try {
     const client = await pool.connect();
     const r = await client.query(
@@ -71,7 +72,10 @@ app.post('/questions', async (req, res) => {
 app.get('/questions', async (req, res) => {
   try {
     const client = await pool.connect();
-    const r = await client.query('SELECT id, house_name, question_text, created_at FROM questions WHERE house_name=$1 ORDER BY created_at DESC LIMIT 100', [HOUSE_NAME]);
+    const r = await client.query(
+      'SELECT id, house_name, question_text, created_at FROM questions WHERE house_name=$1 ORDER BY created_at DESC LIMIT 100',
+      [HOUSE_NAME]
+    );
     client.release();
     res.json(r.rows);
   } catch (err) {
@@ -82,4 +86,3 @@ app.get('/questions', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(HOUSE_NAME + ' service running on ' + PORT));
-EOF
