@@ -1,0 +1,80 @@
+version: '3.8'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:5173'
+    environment:
+      - REACT_APP_API_BASE=http://localhost
+    depends_on:
+      - gryffindor
+      - slytherin
+      - ravenclaw
+      - hufflepuff
+
+  gryffindor:
+    build: ./services/gryffindor
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=hp_user
+      - DB_PASS=hp_pass
+      - DB_NAME=hp_db
+      - HOUSE_NAME=Gryffindor
+    ports:
+      - '5001:5000'
+    depends_on:
+      - postgres
+
+  slytherin:
+    build: ./services/slytherin
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=hp_user
+      - DB_PASS=hp_pass
+      - DB_NAME=hp_db
+      - HOUSE_NAME=Slytherin
+    ports:
+      - '5002:5000'
+    depends_on:
+      - postgres
+
+  ravenclaw:
+    build: ./services/ravenclaw
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=hp_user
+      - DB_PASS=hp_pass
+      - DB_NAME=hp_db
+      - HOUSE_NAME=Ravenclaw
+    ports:
+      - '5003:5000'
+    depends_on:
+      - postgres
+
+  hufflepuff:
+    build: ./services/hufflepuff
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=hp_user
+      - DB_PASS=hp_pass
+      - DB_NAME=hp_db
+      - HOUSE_NAME=Hufflepuff
+    ports:
+      - '5004:5000'
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: hp_user
+      POSTGRES_PASSWORD: hp_pass
+      POSTGRES_DB: hp_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+volumes:
+  pgdata:
