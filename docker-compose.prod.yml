@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - gryffindor
+      - slytherin
+      - ravenclaw
+      - hufflepuff
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  gryffindor:
+    build: ./services/gryffindor
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - HOUSE_NAME=Gryffindor
+    restart: unless-stopped
+
+  slytherin:
+    build: ./services/slytherin
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - HOUSE_NAME=Slytherin
+    restart: unless-stopped
+
+  ravenclaw:
+    build: ./services/ravenclaw
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - HOUSE_NAME=Ravenclaw
+    restart: unless-stopped
+
+  hufflepuff:
+    build: ./services/hufflepuff
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - HOUSE_NAME=Hufflepuff
+    restart: unless-stopped
+
+# Note: no postgres service here — RDS is used (set DB_HOST in .env on EC2)
